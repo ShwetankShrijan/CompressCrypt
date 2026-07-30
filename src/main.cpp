@@ -107,21 +107,35 @@ int main() {
     Node* root = pq.top();
     unordered_map<char, string> huffmanCode;
     generateCodes(root, "", huffmanCode);
-    cout << "Character\tFrequency\tCode\n";
-    cout << "-------------------------------------\n";
-    for (auto p : freq) {
-        cout << p.first << "\t\t"
-             << p.second << "\t\t"
-             << huffmanCode[p.first] << endl;
-    }
     string encoded = "";
     for (char c : text) {
         encoded += huffmanCode[c];
     }
+    ofstream out("data/encoded.bin", ios::binary);
+    if (!out){
+        cout << "Error creating encoded.bin\n";
+        return 1;
+    }
+    out.write(encoded.c_str(), encoded.size());
+    out.close();
+
     cout << "\nEncoded Message:\n";
     cout << encoded << endl;
 
-    string decoded = decode(root, encoded);
+    ifstream in("data/encoded.bin", ios::binary);
+    if (!in) {
+        cout << "Error opening encoded.bin\n";
+        deleteTree(root);
+        return 1;
+    }
+
+    string encodedFromFile(
+        (istreambuf_iterator<char>(in)),
+        istreambuf_iterator<char>());
+
+    in.close();
+
+    string decoded = decode(root, encodedFromFile);
 
     cout << "\nDecoded Message:\n";
     cout << decoded << endl;
