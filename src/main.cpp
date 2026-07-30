@@ -118,6 +118,15 @@ int main() {
         return 1;
     }
     vector<unsigned char> packed = packBits(encoded);
+    int bitCount = encoded.length();
+    int uniqueChars = freq.size();
+    out.write(reinterpret_cast<char*>(&bitCount), sizeof(bitCount));
+    out.write(reinterpret_cast<char*>(&uniqueChars), sizeof(uniqueChars));
+    for (auto p : freq) {
+        out.write(reinterpret_cast<const char*>(&p.first), sizeof(char));
+        out.write(reinterpret_cast<const char*>(&p.second), sizeof(int));
+    }
+
     out.write(reinterpret_cast<char*>(packed.data()), packed.size());
     out.close();
 
@@ -131,6 +140,20 @@ int main() {
         return 1;
     }
 
+    in.read(reinterpret_cast<char*>(&bitCount), sizeof(bitCount));
+    in.read(reinterpret_cast<char*>(&uniqueChars), sizeof(uniqueChars));
+
+    unordered_map<char, int> fileFreq;
+    for (int i = 0; i < uniqueChars; i++) {
+        char ch;
+        int frequency;
+
+        in.read(reinterpret_cast<char*>(&ch), sizeof(char));
+        in.read(reinterpret_cast<char*>(&frequency), sizeof(int));
+
+        fileFreq[ch] = frequency;
+    }
+
     vector<unsigned char> packedData(
     (istreambuf_iterator<char>(in)),
     istreambuf_iterator<char>());
@@ -138,7 +161,7 @@ int main() {
     in.close();
 
     string encodedFromFile =
-    unpackBits(packedData, encoded.length());
+    unpackBits(packedData, bitCount);
 
     string decoded = decode(root, encodedFromFile);
 
