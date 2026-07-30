@@ -53,6 +53,20 @@ void generateCodes(Node* root, string code, unordered_map<char, string>& huffman
     generateCodes(root->right, code + "1", huffmanCode);
 }
 
+string decode(Node* root, const string& encoded){
+    string decoded = "";
+    Node* current = root;
+    for(char bit : encoded){
+        if(bit == '0') current = current->left;
+        else current = current->right;
+        if(!current->left && !current->right){
+            decoded += current->ch;
+            current = root;
+        }
+    }
+    return decoded;
+}
+
 void deleteTree(Node* root) {
     if (!root)
         return;
@@ -62,7 +76,7 @@ void deleteTree(Node* root) {
 }
 
 int main() {
-    ifstream file("../sample/messages.txt");
+    ifstream file("sample/messages.txt");
     if (!file) {
         cout << "Error opening messages.txt\n";
         return 1;
@@ -104,10 +118,14 @@ int main() {
     for (char c : text) {
         encoded += huffmanCode[c];
     }
-    cout << "\nOriginal Message:\n";
-    cout << text << endl;
     cout << "\nEncoded Message:\n";
     cout << encoded << endl;
+
+    string decoded = decode(root, encoded);
+
+    cout << "\nDecoded Message:\n";
+    cout << decoded << endl;
+
     deleteTree(root);
     return 0;
 }
