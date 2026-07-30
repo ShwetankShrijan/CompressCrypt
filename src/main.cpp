@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <fstream>
+#include "../include/bitpack.h"
 using namespace std;
 
 struct Node {
@@ -116,7 +117,8 @@ int main() {
         cout << "Error creating encoded.bin\n";
         return 1;
     }
-    out.write(encoded.c_str(), encoded.size());
+    vector<unsigned char> packed = packBits(encoded);
+    out.write(reinterpret_cast<char*>(packed.data()), packed.size());
     out.close();
 
     cout << "\nEncoded Message:\n";
@@ -129,11 +131,14 @@ int main() {
         return 1;
     }
 
-    string encodedFromFile(
-        (istreambuf_iterator<char>(in)),
-        istreambuf_iterator<char>());
+    vector<unsigned char> packedData(
+    (istreambuf_iterator<char>(in)),
+    istreambuf_iterator<char>());
 
     in.close();
+
+    string encodedFromFile =
+    unpackBits(packedData, encoded.length());
 
     string decoded = decode(root, encodedFromFile);
 
